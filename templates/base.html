@@ -2,9 +2,51 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <header>
+        <ul>
+            <li>
+                <a href="{{ url_for('home') }}">Home</a>
+            </li>
+            <br>
+            {% if 'username' in session %}
+            <li>
+                <a href="{{ url_for('logout') }}">logout</a>
+            </li>
+            <li>
+                 <a href="{{ url_for('user', username=session.username) }}">My profile</a>
+            </li>
+            {% else %}
+            <li>
+                <a href="{{ url_for('login') }}">Авторизація</a>
+            </li>
+            <li>
+                <a href="{{ url_for('register') }}">Реєстрація</a>
+            </li>
+            {% endif %}
+            <li>
+                <a href="{{ url_for('about') }}">About</a>
+            </li>
+        </ul>
+    </header>
+
+<div>
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+</div>
+<content>
     {% block content %}{% endblock %}
+</content>
+
 </body>
 </html>
