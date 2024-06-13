@@ -1,65 +1,29 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
-
+from flask import render_template, redirect, url_for, session, flash
+from flask import Flask, request
 app = Flask(__name__)
-app.secret_key = 'supersecretkey'
-
-users = {
-    'Nazar': '123456',
-    'Yura': '1234567',
-}
 
 
 @app.route("/")
 def home():
-    return render_template('home.html')
-
-
-@app.route("/bye")
-def bye_world():
-    return render_template('bye.html')
-
-
-@app.route("/hello/<username>")
-def hello_user(username):
-    return render_template(
-        'hello_user.html',
-        username=username
-    )
-
-
-@app.route("/users")
-def user_list():
-    users_list = list(users.keys())
-
-    return render_template(
-        'user_list.html',
-        users_list=users_list
-    )
-
-
-@app.route("/users/<string:username>")
-def user(username):
-    if 'username' in session and session['username'] == username:
-        return render_template(
-            'user.html',
-            username=username
-        )
+    return render_template('_base.html')
 
 
 @app.route("/posts")
 def posts():
-    return render_template(
-        'posts.html',
-        posts=range(1, 11)
-    )
+    return render_template('posts.html', posts=range(1, 11))
 
 
-@app.route("/posts/<int:post_id>")
+user_database = {
+    "Nazar": "123456",
+    "Vlad": "1234567"
+}
+
+app.secret_key = 'secretkey'
+
+
+@app.route('/posts/<int:post_id>')
 def show_post(post_id):
-    return render_template(
-        'show_post.html',
-        post_id=post_id
-    )
+    return render_template('show_posts.html', post_id=post_id)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -67,26 +31,41 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-
-        if username in users and users[username] == password:
+        if username in user_database and user_database[username] == password:
             session['username'] = username
-            flash('Ви Зареєструвались. Дякую')
-
-            return redirect(url_for('user', username=username))
+            flash("Nothing")
+            return redirect(url_for('hello_user', username=request.form['username']))
 
     return render_template('login.html')
 
+
 @app.route('/logout')
 def logout():
-    username = session.pop('username', None )
-    if username:
-        flash('Ви нас кинули')
+    session.pop('username', None)
+
     return redirect(url_for('home'))
 
 
-@app.route('/register')
+@app.route('/register', methods=['GET',  'POST'])
 def register():
+    if request.method == "POST":
+        return redirect(url_for('home'))
     return render_template('register.html')
+
+
+@app.route("/user/<username>")
+def hello_user(username):
+    if 'username' in session and session['username'] == username:
+        return render_template('user.html', username=username)
+
+
+@app.route('/users')
+def show_users_profile():
+    users = [
+        'Nazar',
+        'Vlad'
+    ]
+    return render_template('user_list.html', users=users)
 
 
 @app.route('/about')
@@ -94,5 +73,5 @@ def about():
     return render_template('about.html')
 
 
-if __name__ == "__main__":
-    app.run(debug=True, port=0000)
+if __name__ == '__main__':
+    app.run(debug=True)
